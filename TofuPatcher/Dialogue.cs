@@ -238,8 +238,8 @@ namespace TofuPatcher
         /// <summary>
         /// The set of valid characters that will display properly in-game
         /// </summary>
-        private static readonly IReadOnlySet<char> ValidChars =
-            "`1234567890-=~!@#$%^&*():_+QWERTYUIOP[]ASDFGHJKL;'\"ZXCVBNM,./qwertyuiop{}\\asdfghjklzxcvbnm<>?|¡¢£¤¥¦§¨©ª«®¯°²³´¶·¸¹º»¼½¾¿ÄÀÁÂÃÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþ ÿ ".ToFrozenSet();
+        private static readonly string ValidChars =
+            "`1234567890-=~!@#$%^&*():_+QWERTYUIOP[]ASDFGHJKL;'\"ZXCVBNM,./qwertyuiop{}\\asdfghjklzxcvbnm<>?|¡¢£¤¥¦§¨©ª«®¯°²³´¶·¸¹º»¼½¾¿ÄÀÁÂÃÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþ ÿ ";
 
         /// <summary>
         /// Converts a string that may contain invalid characters to ASCII
@@ -254,7 +254,7 @@ namespace TofuPatcher
                 return null;
             }
 
-            var invalidChars = text.ToFrozenSet().Except(ValidChars);
+            var invalidChars = text.Distinct().Except(ValidChars);
             var fixedText = invalidChars.Aggregate(
                 text.Trim(),
                 (current, character) =>
