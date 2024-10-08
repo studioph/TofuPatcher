@@ -1,0 +1,12 @@
+{
+  "Nickname": "TofuPatcher",
+  "Visibility": "IncludeButHide",
+  "OneLineDescription": "Fixes tofu (square glyphs) characters in dialogue. Adaption of Tofu Detective",
+  "LongDescription": "Fixes the square glyphs found in some dialogue caused by visually similar, but differently encoded characters that aren't supported by Skyrim. Converts any invalid characters that would fail to display in-game into their valid counterparts.",
+  "PreferredAutoVersioning": "Default",
+  "RequiredMods": [],
+  "TargetedReleases": [
+    "SkyrimSE",
+    "SkyrimSEGog"
+  ]
+}

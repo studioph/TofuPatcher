@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net7.0</TargetFramework>
+    <TargetPlatformIdentifier>Windows</TargetPlatformIdentifier>
+    <ImplicitUsings>true</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AnyAscii" Version="0.3.2" />
+    <PackageReference Include="Mutagen.Bethesda.Skyrim" Version="0.45" />
+    <PackageReference Include="Mutagen.Bethesda.Synthesis" Version="0.29" />
+    <PackageReference Include="Badeend.ValueCollections" Version="0.2.0" />
+  </ItemGroup>
+</Project>
