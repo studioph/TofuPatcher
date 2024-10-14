@@ -1,5 +1,4 @@
 using Mutagen.Bethesda.Plugins;
-using Mutagen.Bethesda.Skyrim;
 using Mutagen.Bethesda.WPF.Reflection.Attributes;
 
 namespace TofuPatcher
@@ -9,8 +8,13 @@ namespace TofuPatcher
         [SettingName("Mods to exclude")]
         public IEnumerable<ModKey> ExcludeMods = new List<ModKey>();
 
+        [Tooltip(
+            "Trim excess whitespace from text. Turn off if you don't want this or if you get TooManyMasters error"
+        )]
+        public bool TrimWhitespace = true;
+
+        [Ignore]
         [SettingName("Records to exclude")]
-        public IEnumerable<IFormLinkGetter<IDialogGetter>> ExcludeRecords =
-            new List<IFormLinkGetter<IDialogGetter>>();
+        public IEnumerable<string> ExcludeRecords = new List<string>();
     }
 }
