@@ -1,5 +1,6 @@
 using Badeend.ValueCollections;
 using Mutagen.Bethesda.Plugins.Cache;
+using Mutagen.Bethesda.Plugins.Records;
 using Mutagen.Bethesda.Skyrim;
 
 namespace TofuPatcher
@@ -23,23 +24,24 @@ namespace TofuPatcher
     /// <param name="Context">The mod context for the record</param>
     /// <param name="Original">The original text values of the record</param>
     /// <param name="Fixed">The processed text values</param>
-    public readonly record struct FixedDialogue<TMajor, TMajorGetter, TValue>(
+    public readonly record struct FixedText<TMajor, TMajorGetter, TValue>(
         IModContext<ISkyrimMod, ISkyrimModGetter, TMajor, TMajorGetter> Context,
         TValue Original,
         TValue Fixed
     )
         where TMajor : TMajorGetter
-        where TMajorGetter : IDialogGetter
+        where TMajorGetter : IMajorRecordQueryableGetter
         where TValue : notnull
     {
-        public bool Equals(FixedDialogue<TMajor, TMajorGetter, TValue> other) =>
-            Context.Record.FormKey == other.Context.Record.FormKey
+        public bool Equals(FixedText<TMajor, TMajorGetter, TValue> other) =>
+            ((IMajorRecordGetter)Context.Record).FormKey
+                == ((IMajorRecordGetter)other.Context.Record).FormKey
             && Original.Equals(other.Original)
             && Fixed.Equals(other.Fixed);
 
         public override int GetHashCode() =>
             HashCode.Combine(
-                Context.Record.FormKey.GetHashCode(),
+                ((IMajorRecordGetter)Context.Record).FormKey.GetHashCode(),
                 Original.GetHashCode(),
                 Fixed.GetHashCode()
             );

@@ -1,5 +1,8 @@
 using System.Collections.Frozen;
+using System.Diagnostics;
 using Mutagen.Bethesda;
+using Mutagen.Bethesda.Plugins;
+using Mutagen.Bethesda.Plugins.Aspects;
 using Mutagen.Bethesda.Skyrim;
 using Mutagen.Bethesda.Synthesis;
 
@@ -26,25 +29,43 @@ namespace TofuPatcher
         {
             var excludeMods = Settings.Value.ExcludeMods.ToFrozenSet();
             var excludeRecords = Settings
-                .Value.ExcludeRecords.Select(record => record.FormKey)
+                .Value.ExcludeRecords.Select(str => FormKey.Factory(str))
                 .ToFrozenSet();
 
-            var pipeline = new DialoguePatcherPipeline(
+            var transforms = new List<Func<string?, string?>> { TextUtil.ToAscii };
+
+            if (Settings.Value.TrimWhitespace)
+            {
+                transforms.Add(str => str?.Trim());
+            }
+
+            var namedPatcher = new NamedRecordTextPatcher(transforms);
+            var infoPatcher = new DialogueInfoTextPatcher(transforms);
+
+            var pipeline = new TextPatcherPipeline(
                 state.PatchMod,
-                context => !excludeMods.Contains(context.ModKey),
-                context => !excludeRecords.Contains(context.Record.FormKey)
+                context => !excludeMods.Contains(context.ModKey)
             );
 
-            var dialogueTopics = state
-                .LoadOrder.PriorityOrder.DialogTopic()
-                .WinningContextOverrides();
-            pipeline.PatchRecords(DialogueTopicPatcher.Instance, dialogueTopics);
+            var stopwatch = new Stopwatch();
+            stopwatch.Start();
+
+            var namedRecords = state.LoadOrder.PriorityOrder.WinningContextOverrides<
+                ISkyrimMod,
+                ISkyrimModGetter,
+                INamed,
+                INamedGetter
+            >(state.LinkCache);
+
+            pipeline.PatchRecords(namedPatcher, namedRecords);
 
             var dialogueInfos = state
                 .LoadOrder.PriorityOrder.DialogResponses()
                 .WinningContextOverrides(state.LinkCache);
-            pipeline.PatchRecords(DialogueInfoPatcher.Instance, dialogueInfos);
+            pipeline.PatchRecords(infoPatcher, dialogueInfos);
 
+            stopwatch.Stop();
+            Console.WriteLine($"Patcher took {stopwatch.Elapsed.TotalSeconds}s");
             Console.WriteLine($"Patched {pipeline.PatchedCount} total records");
         }
     }
