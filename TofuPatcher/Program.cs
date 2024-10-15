@@ -1,8 +1,8 @@
 using System.Collections.Frozen;
 using System.Diagnostics;
 using Mutagen.Bethesda;
-using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Aspects;
+using Mutagen.Bethesda.Plugins.Records;
 using Mutagen.Bethesda.Skyrim;
 using Mutagen.Bethesda.Synthesis;
 
@@ -49,16 +49,14 @@ namespace TofuPatcher
                 context => !excludeMods.Contains(context.ModKey)
             );
 
-            var stopwatch = new Stopwatch();
-            stopwatch.Start();
-
-            var namedRecords = state.LoadOrder.PriorityOrder.WinningContextOverrides<
+            var namedRecords = state
+                .LoadOrder.PriorityOrder.WinningContextOverrides<
                 ISkyrimMod,
                 ISkyrimModGetter,
                 INamed,
                 INamedGetter
-            >(state.LinkCache);
-
+                >(state.LinkCache)
+                .Where(context => context.Record is IMajorRecordGetter); // Extra check since INamedGetter doesn't inherit from IMajorRecordGetter
             pipeline.PatchRecords(namedPatcher, namedRecords);
 
             var dialogueInfos = state
