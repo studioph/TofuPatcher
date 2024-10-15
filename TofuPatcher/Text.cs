@@ -53,10 +53,11 @@ namespace TofuPatcher
         params Func<IModContext<IMajorRecordQueryableGetter>, bool>[] filters
     )
     {
-        private readonly ISkyrimMod PatchMod = patchMod;
+        private readonly ISkyrimMod _patchMod = patchMod;
 
-        private readonly IEnumerable<Func<IModContext<IMajorRecordQueryableGetter>, bool>> Filters =
-            filters;
+        private readonly IEnumerable<
+            Func<IModContext<IMajorRecordQueryableGetter>, bool>
+        > _filters = filters;
         public uint PatchedCount { get; private set; } = 0;
 
         /// <summary>
@@ -66,8 +67,17 @@ namespace TofuPatcher
         /// <returns>True if the context satisfies all of the conditions</returns>
         public bool FilterCommon<TMajor>(IModContext<TMajor> context)
             where TMajor : IMajorRecordQueryableGetter =>
-            Filters.All(predicate => predicate((IModContext<IMajorRecordQueryableGetter>)context));
+            _filters.All(predicate => predicate((IModContext<IMajorRecordQueryableGetter>)context));
 
+        /// <summary>
+        /// Processes records with the given patcher instance
+        /// </summary>
+        /// <typeparam name="TMajor">The record type</typeparam>
+        /// <typeparam name="TMajorGetter">The record getter type</typeparam>
+        /// <typeparam name="TValue">The type containing the text values for the record. Could be a single string or another object holding multiple values</typeparam>
+        /// <param name="patcher">The patcher instance to use</param>
+        /// <param name="contexts">The record contexts to process</param>
+        /// <returns>The records that should be patched along with the updated values</returns>
         public IEnumerable<FixedText<TMajor, TMajorGetter, TValue>> GetRecordsToPatch<
             TMajor,
             TMajorGetter,
@@ -97,7 +107,7 @@ namespace TofuPatcher
 
             foreach (var item in itemsToPatch)
             {
-                var target = item.Context.GetOrAddAsOverride(PatchMod);
+                var target = item.Context.GetOrAddAsOverride(_patchMod);
                 patcher.Patch(item.Fixed, target);
                 PatchedCount++;
             }
@@ -109,7 +119,7 @@ namespace TofuPatcher
         /// <summary>
         /// The set of valid characters that will display properly in-game
         /// </summary>
-        private static readonly string ValidChars =
+        private static readonly string _validChars =
             "`1234567890-=~!@#$%^&*():_+QWERTYUIOP[]ASDFGHJKL;'\"ZXCVBNM,./qwertyuiop{}\\asdfghjklzxcvbnm<>?|¡¢£¤¥¦§¨©ª«®¯°²³´¶·¸¹º»¼½¾¿ÄÀÁÂÃÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþ ÿ ";
 
         /// <summary>
@@ -137,7 +147,7 @@ namespace TofuPatcher
                 return null;
             }
 
-            var invalidChars = text.Distinct().Except(ValidChars);
+            var invalidChars = text.Distinct().Except(_validChars);
             var fixedText = invalidChars.Aggregate(
                 text,
                 (current, character) =>
