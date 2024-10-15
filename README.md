@@ -8,6 +8,8 @@ This patcher is meant to be simpler and more straightforward than Tofu Detective
 - Convert any invalid characters found in dialogue text and item names to the equivalent character that the game will display
 - Trim excess whitespace from strings
 
+Text fields that are null (not set in the record) or all whitespace are ignored.
+
 ### What this will *not* do
 - Fix any typos or other grammatical errors present in the text (see the example from Beyond Reach below)
 
@@ -21,6 +23,7 @@ The patcher will log which records it updated. These can be viewed in the Synthe
  - **`Mods to exclude`**: A list of modkeys (i.e. plugin filenames) to exclude from patching. Winning records from these mods will be skipped.
  - **`Trim whitespace`**: Trims excess whitespace from text in addition to fixing invalid characters. Default is on, but if you don't want the patcher to do this you can turn it off.
    - Since trimming whitespace also means the patcher will touch *a lot* more records, you can also try turning this off if you get a `TooManyMasters` error in your Synthesis group/pipeline.
+   - For example, in my own setup (~1500 plugins) the difference is ~4600 records changed (~12s) with trimming vs 75 without (~6s)
 
 ## Caveats
 Like Tofu Detective, this patcher is english-centric and will not work for translations. I also do not have plans to support multiple languages. You can configure the patcher to skip any translation plugins by adding them to the `Exclude mods` list in the patcher settings.
