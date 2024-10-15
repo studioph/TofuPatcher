@@ -51,10 +51,10 @@ namespace TofuPatcher
 
             var namedRecords = state
                 .LoadOrder.PriorityOrder.WinningContextOverrides<
-                ISkyrimMod,
-                ISkyrimModGetter,
-                INamed,
-                INamedGetter
+                    ISkyrimMod,
+                    ISkyrimModGetter,
+                    INamed,
+                    INamedGetter
                 >(state.LinkCache)
                 .Where(context => context.Record is IMajorRecordGetter); // Extra check since INamedGetter doesn't inherit from IMajorRecordGetter
             pipeline.PatchRecords(namedPatcher, namedRecords);
