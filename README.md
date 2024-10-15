@@ -1,11 +1,11 @@
 # TofuPatcher
 
-An adaptation of [Tofu Detective](https://github.com/krypto5863/Tofu-Detective) as a Synthesis Patcher. While Tofu Detective already has the capability to ouput a patch mod plugin, I wanted to have a way for those like me who already use Synthesis in their workflow to be able to benefit.
+An adaptation of [Tofu Detective](https://github.com/krypto5863/Tofu-Detective) as a Synthesis Patcher. While Tofu Detective has the capability to ouput a patch mod plugin, I wanted to have a way for users like myself who already use Synthesis in their workflow to be able to benefit.
 
 This patcher is meant to be simpler and more straightforward than Tofu Detective, but does not offer all of the features Tofu Detective does as a standalone utility. See below for details.
 
 ### What this will do
-- Convert any invalid characters found in dialogue text to the equivalent character that the game will display
+- Convert any invalid characters found in dialogue text and item names to the equivalent character that the game will display
 - Trim excess whitespace from strings
 
 ### What this will *not* do
@@ -13,14 +13,14 @@ This patcher is meant to be simpler and more straightforward than Tofu Detective
 
 ## Usage
 - Add to your Synthesis pipeline using the patcher browser
-- If using multiple Synthesis groups, run this patcher in the same group as other patchers that modify dialogue to ensure changes are merged properly.
+- If using multiple Synthesis groups, run this patcher in the same group as other patchers that modify dialogue, or named records (like Books) to ensure changes are merged properly.
 
-The patcher will log which dialogue topics/infos it updated. These can be viewed in the Synthesis log files or in the UI itself.
+The patcher will log which records it updated. These can be viewed in the Synthesis log files or in the UI itself.
 
 ### Available Patcher Settings
- - **`Exclude mods`**: A list of modkeys (i.e. plugin filenames) to exclude from patching. Any dialogue records in these mods will be skipped.
- - **`Exclude records`**: A list of dialogue records to exclude from patching.
-   - **NOTE** the list of available records can take a *reallly looong* time to load given the sheer number of them. Might consider making it an external config file instead for this reason
+ - **`Mods to exclude`**: A list of modkeys (i.e. plugin filenames) to exclude from patching. Winning records from these mods will be skipped.
+ - **`Trim whitespace`**: Trims excess whitespace from text in addition to fixing invalid characters. Default is on, but if you don't want the patcher to do this you can turn it off.
+   - Since trimming whitespace also means the patcher will touch *a lot* more records, you can also try turning this off if you get a `TooManyMasters` error in your Synthesis group/pipeline.
 
 ## Caveats
 Like Tofu Detective, this patcher is english-centric and will not work for translations. I also do not have plans to support multiple languages. You can configure the patcher to skip any translation plugins by adding them to the `Exclude mods` list in the patcher settings.
@@ -29,13 +29,13 @@ Unlike Tofu Detective, the patcher will not provide detailed information about w
 
 ## Should I use this vs Tofu Detective?
 
-If you want more detailed information about each dialogue record, what is wrong with it, or to inspect the text, use Tofu Detective. If you just want to cleanup dialogue records across your load order, use this patcher.
+If you want more detailed information about each record, what is wrong with it, or to inspect the text, use Tofu Detective. If you just want to fix/cleanup records across your load order, use this patcher.
 
 ## Possible future features
 - Custom transliteration mappings
 - Fix simple typos?
 
-This is my first patcher with user settings, not to mention more subjective than my previous patchers, so feedback during the early stages is welcome so that this can evolve into something more useful for more people.
+This is my first patcher with user settings, not to mention it's more subjective than my previous patchers, so feedback during the early stages is welcome so that this can evolve into something more useful for more people.
 
 ## Reporting Bugs/Issues
 Please include the following to help me help you:
