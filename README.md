@@ -26,7 +26,7 @@ The patcher will log which records it updated. These can be viewed in the Synthe
    - For example, in my own setup (~1500 plugins) the difference is ~4600 records changed (~12s) with trimming vs 75 without (~6s)
 
 ## Caveats
-Like Tofu Detective, this patcher is english-centric and will not work for translations. I also do not have plans to support multiple languages. You can configure the patcher to skip any translation plugins by adding them to the `Exclude mods` list in the patcher settings.
+Like Tofu Detective, this patcher is english-centric and will not work for translations. I also do not have plans to support multiple languages. You can configure the patcher to skip any translation plugins by adding them to the `Mods to exclude` list in the patcher settings.
 
 Unlike Tofu Detective, the patcher will not provide detailed information about what was changed for each record (i.e. excess whitespace trimmed vs invalid chars). It will track and log the total number of records patched, but will not provide a breakdown of record types or any other statistics.
 
