@@ -1,8 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using AnyAscii;
-using Badeend.ValueCollections;
 using Mutagen.Bethesda;
-using Mutagen.Bethesda.Plugins.Aspects;
 using Mutagen.Bethesda.Plugins.Cache;
 using Mutagen.Bethesda.Plugins.Records;
 using Mutagen.Bethesda.Skyrim;
@@ -49,88 +47,10 @@ namespace TofuPatcher
     }
 
     /// <summary>
-    /// Class for patching named records
+    /// Class to streamline patching multiple record types
     /// </summary>
-    public class NamedRecordTextPatcher(IEnumerable<Func<string?, string?>> transforms)
-        : IRecordTextPatcher<INamed, INamedGetter, string>
-    {
-        public IEnumerable<Func<string?, string?>> Transforms { get; } = transforms;
-
-        public bool Filter(INamedGetter record) => !record.Name.IsNullOrWhitespace();
-
-        public void Patch(string fixedText, INamed target)
-        {
-            target.Name = fixedText;
-            var formKey = ((IMajorRecordGetter)target).FormKey;
-            Console.WriteLine($"Patched {formKey}");
-        }
-
-        public FixedText<INamed, INamedGetter, string> Process(
-            IModContext<ISkyrimMod, ISkyrimModGetter, INamed, INamedGetter> context,
-            IEnumerable<Func<string?, string?>> transforms
-        )
-        {
-            var original = context.Record.Name!;
-            var processed = original.Transform(transforms);
-            // var formKey = ((IFormKeyGetter)context.Record).FormKey;
-            return new FixedText<INamed, INamedGetter, string>(context, original, processed);
-        }
-    }
-
-    public class DialogueInfoTextPatcher(IEnumerable<Func<string?, string?>> transforms)
-        : IRecordTextPatcher<IDialogResponses, IDialogResponsesGetter, DialogueInfoTexts>
-    {
-        public IEnumerable<Func<string?, string?>> Transforms { get; } = transforms;
-
-        public bool Filter(IDialogResponsesGetter record)
-        {
-            var hasPrompt = !record.Prompt?.String.IsNullOrWhitespace() ?? false;
-            var hasResponses = record.Responses.Any(response =>
-                !response.Text.String.IsNullOrWhitespace()
-            );
-
-            return hasPrompt || hasResponses;
-        }
-
-        public void Patch(DialogueInfoTexts fixedDialogue, IDialogResponses target)
-        {
-            target.Prompt = fixedDialogue.Prompt;
-
-            var zipped = target.Responses.Zip(fixedDialogue.Responses);
-            foreach (var (response, fixedText) in zipped)
-            {
-                response.Text = fixedText;
-            }
-            Console.WriteLine($"Patched INFO:{target.FormKey}");
-        }
-
-        public FixedText<IDialogResponses, IDialogResponsesGetter, DialogueInfoTexts> Process(
-            IModContext<
-                ISkyrimMod,
-                ISkyrimModGetter,
-                IDialogResponses,
-                IDialogResponsesGetter
-            > context,
-            IEnumerable<Func<string?, string?>> transforms
-        )
-        {
-            var prompt = context.Record.Prompt?.String;
-            var responses = context.Record.Responses.Select(response => response.Text.String);
-            var original = new DialogueInfoTexts(responses.ToValueList(), prompt);
-
-            var processed = new DialogueInfoTexts(
-                original.Responses.Select(response => response.Transform(transforms)).ToValueList(),
-                original.Prompt.Transform(transforms)
-            );
-
-            return new FixedText<IDialogResponses, IDialogResponsesGetter, DialogueInfoTexts>(
-                context,
-                original,
-                processed
-            );
-        }
-    }
-
+    /// <param name="patchMod">The mutable mod object to write changes to</param>
+    /// <param name="filters">Common filters to apply to each record/context before processing</param>
     public class TextPatcherPipeline(
         ISkyrimMod patchMod,
         params Func<IModContext<IMajorRecordQueryableGetter>, bool>[] filters
