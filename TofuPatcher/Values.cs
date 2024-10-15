@@ -10,10 +10,8 @@ namespace TofuPatcher
     /// </summary>
     /// <param name="Responses">The text string for each response in the record</param>
     /// <param name="Prompt">The prompt that triggers the responses</param>
-    public readonly record struct DialogueInfoTexts(
-        ValueList<string?> Responses,
-        string? Prompt = null
-    );
+    public readonly record struct DialogueInfoTexts(ValueList<string?> Responses, string? Prompt);
+
 
     /// <summary>
     /// DTO object containing the original text values, the processed values, and the associcated mod context
