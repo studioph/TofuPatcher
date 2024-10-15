@@ -39,11 +39,8 @@ namespace TofuPatcher
         /// <param name="context">The mod context for the record</param>
         /// <returns>A DTO containing the original values, processed values, and the mod context</returns>
         public FixedText<TMajor, TMajorGetter, TValue> Process(
-            IModContext<ISkyrimMod, ISkyrimModGetter, TMajor, TMajorGetter> context,
-            IEnumerable<Func<string?, string?>> transforms
+            IModContext<ISkyrimMod, ISkyrimModGetter, TMajor, TMajorGetter> context
         );
-
-        public IEnumerable<Func<string?, string?>> Transforms { get; }
     }
 
     /// <summary>
@@ -83,9 +80,9 @@ namespace TofuPatcher
             where TMajorGetter : IMajorRecordQueryableGetter
             where TValue : notnull =>
             contexts
-                .Where(context => FilterCommon(context))
+                .Where(FilterCommon)
                 .Where(context => patcher.Filter(context.Record))
-                .Select(context => patcher.Process(context, patcher.Transforms))
+                .Select(patcher.Process)
                 .Where(result => !result.Fixed.Equals(result.Original));
 
         public void PatchRecords<TMajor, TMajorGetter, TValue>(
