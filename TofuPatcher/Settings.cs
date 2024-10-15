@@ -12,9 +12,5 @@ namespace TofuPatcher
             "Trim excess whitespace from text. Turn off if you don't want this or if you get TooManyMasters error"
         )]
         public bool TrimWhitespace = true;
-
-        [Ignore]
-        [SettingName("Records to exclude")]
-        public IEnumerable<string> ExcludeRecords = new List<string>();
     }
 }

@@ -29,9 +29,6 @@ namespace TofuPatcher
         public static void RunPatch(IPatcherState<ISkyrimMod, ISkyrimModGetter> state)
         {
             var excludeMods = Settings.ExcludeMods.ToFrozenSet();
-            var excludeRecords = Settings
-                .ExcludeRecords.Select(str => FormKey.Factory(str))
-                .ToFrozenSet();
 
             var transforms = new List<Func<string?, string?>> { TextUtil.ToAscii };
 
