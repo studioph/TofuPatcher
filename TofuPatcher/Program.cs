@@ -37,6 +37,10 @@ namespace TofuPatcher
                 transforms.Add(str => str?.Trim());
             }
 
+#if DEBUG
+            long startTime = Stopwatch.GetTimestamp();
+#endif
+
             var namedPatcher = new NamedRecordTextPatcher(transforms);
             var infoPatcher = new DialogueInfoTextPatcher(transforms);
 
@@ -62,8 +66,11 @@ namespace TofuPatcher
                 .WinningContextOverrides(state.LinkCache);
             pipeline.PatchRecords(infoPatcher, dialogueInfos);
 
-            stopwatch.Stop();
-            Console.WriteLine($"Patcher took {stopwatch.Elapsed.TotalSeconds}s");
+#if DEBUG
+            TimeSpan elaspedTime = Stopwatch.GetElapsedTime(startTime);
+            Console.WriteLine($"Patcher took {elaspedTime.TotalSeconds}s");
+#endif
+
             Console.WriteLine($"Patched {pipeline.PatchedCount} total records");
         }
     }
