@@ -33,7 +33,7 @@ namespace TofuPatcher
             var processed = original.Transform(_transforms);
             return new FixedText<INamed, INamedGetter, string>(
                 context,
-                original ?? string.Empty,
+                original ?? string.Empty, // Shouldn't ever be null due to pre-filter but need to make compiler happy
                 processed ?? string.Empty
             );
         }
@@ -62,10 +62,9 @@ namespace TofuPatcher
         {
             target.Prompt = fixedDialogue.Prompt;
 
-            var zipped = target.Responses.Zip(fixedDialogue.Responses);
-            foreach (var (response, fixedText) in zipped)
+            for (int i = 0; i < fixedDialogue.Responses.Count; i++)
             {
-                response.Text = fixedText;
+                target.Responses[i].Text = fixedDialogue.Responses[i];
             }
             Console.WriteLine($"Patched INFO:{target.FormKey}");
         }
@@ -84,8 +83,8 @@ namespace TofuPatcher
             var original = new DialogueInfoTexts(prompt, responses.ToValueList());
 
             var processed = new DialogueInfoTexts(
-                original.Prompt.Transform(_transforms),
-                original.Responses.Select(response => response.Transform(_transforms)).ToValueList()
+                prompt.Transform(_transforms),
+                responses.Select(response => response.Transform(_transforms)).ToValueList()
             );
 
             return new FixedText<IDialogResponses, IDialogResponsesGetter, DialogueInfoTexts>(
