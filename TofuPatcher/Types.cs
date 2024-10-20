@@ -10,8 +10,9 @@ namespace TofuPatcher
     /// </summary>
     /// <param name="Responses">The text string for each response in the record</param>
     /// <param name="Prompt">The prompt that triggers the responses</param>
-    public readonly record struct DialogueInfoTexts(ValueList<string?> Responses, string? Prompt);
+    public sealed record DialogueInfoTexts(string? Prompt, ValueList<string?> Responses);
 
+    public sealed record BookTexts(string? Name, string? BookText);
 
     /// <summary>
     /// DTO object containing the original text values, the processed values, and the associcated mod context
@@ -22,26 +23,12 @@ namespace TofuPatcher
     /// <param name="Context">The mod context for the record</param>
     /// <param name="Original">The original text values of the record</param>
     /// <param name="Fixed">The processed text values</param>
-    public readonly record struct FixedText<TMajor, TMajorGetter, TValue>(
+    public sealed record FixedText<TMajor, TMajorGetter, TValue>(
         IModContext<ISkyrimMod, ISkyrimModGetter, TMajor, TMajorGetter> Context,
         TValue Original,
         TValue Fixed
     )
         where TMajor : TMajorGetter
         where TMajorGetter : IMajorRecordQueryableGetter
-        where TValue : notnull
-    {
-        public bool Equals(FixedText<TMajor, TMajorGetter, TValue> other) =>
-            ((IMajorRecordGetter)Context.Record).FormKey
-                == ((IMajorRecordGetter)other.Context.Record).FormKey
-            && Original.Equals(other.Original)
-            && Fixed.Equals(other.Fixed);
+        where TValue : notnull;
 
-        public override int GetHashCode() =>
-            HashCode.Combine(
-                ((IMajorRecordGetter)Context.Record).FormKey.GetHashCode(),
-                Original.GetHashCode(),
-                Fixed.GetHashCode()
-            );
-    }
-}

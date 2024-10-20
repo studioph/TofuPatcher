@@ -81,13 +81,11 @@ namespace TofuPatcher
         {
             var prompt = context.Record.Prompt?.String;
             var responses = context.Record.Responses.Select(response => response.Text.String);
-            var original = new DialogueInfoTexts(responses.ToValueList(), prompt);
+            var original = new DialogueInfoTexts(prompt, responses.ToValueList());
 
             var processed = new DialogueInfoTexts(
-                original
-                    .Responses.Select(response => response.Transform(_transforms))
-                    .ToValueList(),
-                original.Prompt.Transform(_transforms)
+                original.Prompt.Transform(_transforms),
+                original.Responses.Select(response => response.Transform(_transforms)).ToValueList()
             );
 
             return new FixedText<IDialogResponses, IDialogResponsesGetter, DialogueInfoTexts>(
