@@ -148,6 +148,13 @@ namespace TofuPatcher
             }
 
             var invalidChars = text.Distinct().Except(_validChars);
+
+            // No invalid chars, string is unchanged
+            if (!invalidChars.Any())
+            {
+                return text;
+            }
+
             var fixedText = invalidChars.Aggregate(
                 text,
                 (current, character) =>
