@@ -1,10 +1,10 @@
 using System.Diagnostics.CodeAnalysis;
 using AnyAscii;
-using Mutagen.Bethesda;
 using Mutagen.Bethesda.Plugins.Cache;
 using Mutagen.Bethesda.Plugins.Records;
 using Mutagen.Bethesda.Skyrim;
 using Noggog;
+using Synthesis.Util;
 
 namespace TofuPatcher
 {
@@ -15,32 +15,12 @@ namespace TofuPatcher
     /// <typeparam name="TMajorGetter">The record/category/aspect getter type</typeparam>
     /// <typeparam name="TValue">The type containing the text values for the record. Could be a single string or another object holding multiple values</typeparam>
     public interface IRecordTextPatcher<TMajor, TMajorGetter, TValue>
+        : IConditionalTransformPatcher<TMajor, TMajorGetter, FixedText<TValue>>
         where TMajor : TMajorGetter
         where TMajorGetter : IMajorRecordQueryableGetter
         where TValue : notnull
     {
-        /// <summary>
-        /// Optionally checks any criteria to filter out the record before processing for efficiency
-        /// </summary>
-        /// <param name="record">The record to check</param>
-        /// <returns>False if the record should be skipped</returns>
-        public bool Filter(TMajorGetter record);
-
-        /// <summary>
-        /// Patches the record with the updated text strings
-        /// </summary>
-        /// <param name="fixedText">The processed text values</param>
-        /// <param name="target">The target record to update</param>
-        public void Patch(TValue fixedText, TMajor target);
-
-        /// <summary>
-        /// Transforms the text values from the record by applying one or more transformation functions
-        /// </summary>
-        /// <param name="context">The mod context for the record</param>
-        /// <returns>A DTO containing the original values, processed values, and the mod context</returns>
-        public FixedText<TMajor, TMajorGetter, TValue> Process(
-            IModContext<ISkyrimMod, ISkyrimModGetter, TMajor, TMajorGetter> context
-        );
+        // Sadly, cannot use default interface method for `ShouldPatch` here...
     }
 
     /// <summary>
@@ -52,13 +32,16 @@ namespace TofuPatcher
         ISkyrimMod patchMod,
         params Func<IModContext<IMajorRecordQueryableGetter>, bool>[] filters
     )
+        : ConditionalTransformPatcherPipeline<
+            ISkyrimMod,
+            ISkyrimModGetter,
+            IMajorRecordQueryable,
+            IMajorRecordQueryableGetter
+        >(patchMod)
     {
-        private readonly ISkyrimMod _patchMod = patchMod;
-
         private readonly IEnumerable<
             Func<IModContext<IMajorRecordQueryableGetter>, bool>
         > _filters = filters;
-        public uint PatchedCount { get; private set; } = 0;
 
         /// <summary>
         /// Applies multiple filters against a mod context
@@ -68,50 +51,6 @@ namespace TofuPatcher
         public bool FilterCommon<TMajor>(IModContext<TMajor> context)
             where TMajor : IMajorRecordQueryableGetter =>
             _filters.All(predicate => predicate((IModContext<IMajorRecordQueryableGetter>)context));
-
-        /// <summary>
-        /// Processes records with the given patcher instance
-        /// </summary>
-        /// <typeparam name="TMajor">The record type</typeparam>
-        /// <typeparam name="TMajorGetter">The record getter type</typeparam>
-        /// <typeparam name="TValue">The type containing the text values for the record. Could be a single string or another object holding multiple values</typeparam>
-        /// <param name="patcher">The patcher instance to use</param>
-        /// <param name="contexts">The record contexts to process</param>
-        /// <returns>The records that should be patched along with the updated values</returns>
-        public IEnumerable<FixedText<TMajor, TMajorGetter, TValue>> GetRecordsToPatch<
-            TMajor,
-            TMajorGetter,
-            TValue
-        >(
-            IRecordTextPatcher<TMajor, TMajorGetter, TValue> patcher,
-            IEnumerable<IModContext<ISkyrimMod, ISkyrimModGetter, TMajor, TMajorGetter>> contexts
-        )
-            where TMajor : TMajorGetter
-            where TMajorGetter : IMajorRecordQueryableGetter
-            where TValue : notnull =>
-            contexts
-                .Where(FilterCommon)
-                .Where(context => patcher.Filter(context.Record))
-                .Select(patcher.Process)
-                .Where(result => !result.Fixed.Equals(result.Original));
-
-        public void PatchRecords<TMajor, TMajorGetter, TValue>(
-            IRecordTextPatcher<TMajor, TMajorGetter, TValue> patcher,
-            IEnumerable<IModContext<ISkyrimMod, ISkyrimModGetter, TMajor, TMajorGetter>> contexts
-        )
-            where TMajor : TMajorGetter
-            where TMajorGetter : IMajorRecordQueryableGetter
-            where TValue : notnull
-        {
-            var itemsToPatch = GetRecordsToPatch(patcher, contexts);
-
-            foreach (var item in itemsToPatch)
-            {
-                var target = item.Context.GetOrAddAsOverride(_patchMod);
-                patcher.Patch(item.Fixed, target);
-                PatchedCount++;
-            }
-        }
     }
 
     public static class TextUtil

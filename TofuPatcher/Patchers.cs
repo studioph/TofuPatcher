@@ -1,6 +1,5 @@
 using Badeend.ValueCollections;
 using Mutagen.Bethesda.Plugins.Aspects;
-using Mutagen.Bethesda.Plugins.Cache;
 using Mutagen.Bethesda.Plugins.Records;
 using Mutagen.Bethesda.Skyrim;
 using Noggog;
@@ -16,27 +15,27 @@ namespace TofuPatcher
     {
         private readonly IEnumerable<Func<string?, string?>> _transforms = transforms;
 
+        public FixedText<string> Apply(INamedGetter record)
+        {
+            var original = record.Name;
+            var processed = original.Transform(_transforms);
+            return new FixedText<string>(
+                // Shouldn't ever be null due to pre-filter but need to make compiler happy
+                original ?? string.Empty,
+                processed ?? string.Empty
+            );
+        }
+
         public bool Filter(INamedGetter record) => !record.Name.IsNullOrWhitespace();
 
-        public void Patch(string fixedText, INamed target)
+        public void Patch(INamed target, FixedText<string> fixedText)
         {
-            target.Name = fixedText;
+            target.Name = fixedText.Fixed;
             var formKey = ((IMajorRecordGetter)target).FormKey;
             Console.WriteLine($"Patched {formKey}");
         }
 
-        public FixedText<INamed, INamedGetter, string> Process(
-            IModContext<ISkyrimMod, ISkyrimModGetter, INamed, INamedGetter> context
-        )
-        {
-            var original = context.Record.Name;
-            var processed = original.Transform(_transforms);
-            return new FixedText<INamed, INamedGetter, string>(
-                context,
-                original ?? string.Empty, // Shouldn't ever be null due to pre-filter but need to make compiler happy
-                processed ?? string.Empty
-            );
-        }
+        public bool ShouldPatch(FixedText<string> values) => !values.Fixed.Equals(values.Original);
     }
 
     /// <summary>
@@ -48,6 +47,20 @@ namespace TofuPatcher
     {
         private readonly IEnumerable<Func<string?, string?>> _transforms = transforms;
 
+        public FixedText<DialogueInfoTexts> Apply(IDialogResponsesGetter record)
+        {
+            var prompt = record.Prompt?.String;
+            var responses = record.Responses.Select(response => response.Text.String);
+            var original = new DialogueInfoTexts(prompt, responses.ToValueList());
+
+            var processed = new DialogueInfoTexts(
+                prompt.Transform(_transforms),
+                responses.Select(response => response.Transform(_transforms)).ToValueList()
+            );
+
+            return new FixedText<DialogueInfoTexts>(original, processed);
+        }
+
         public bool Filter(IDialogResponsesGetter record)
         {
             var hasPrompt = !record.Prompt?.String.IsNullOrWhitespace() ?? false;
@@ -58,8 +71,9 @@ namespace TofuPatcher
             return hasPrompt || hasResponses;
         }
 
-        public void Patch(DialogueInfoTexts fixedDialogue, IDialogResponses target)
+        public void Patch(IDialogResponses target, FixedText<DialogueInfoTexts> values)
         {
+            var fixedDialogue = values.Fixed;
             target.Prompt = fixedDialogue.Prompt;
 
             for (int i = 0; i < fixedDialogue.Responses.Count; i++)
@@ -69,29 +83,44 @@ namespace TofuPatcher
             Console.WriteLine($"Patched INFO:{target.FormKey}");
         }
 
-        public FixedText<IDialogResponses, IDialogResponsesGetter, DialogueInfoTexts> Process(
-            IModContext<
-                ISkyrimMod,
-                ISkyrimModGetter,
-                IDialogResponses,
-                IDialogResponsesGetter
-            > context
-        )
-        {
-            var prompt = context.Record.Prompt?.String;
-            var responses = context.Record.Responses.Select(response => response.Text.String);
-            var original = new DialogueInfoTexts(prompt, responses.ToValueList());
-
-            var processed = new DialogueInfoTexts(
-                prompt.Transform(_transforms),
-                responses.Select(response => response.Transform(_transforms)).ToValueList()
-            );
-
-            return new FixedText<IDialogResponses, IDialogResponsesGetter, DialogueInfoTexts>(
-                context,
-                original,
-                processed
-            );
-        }
+        public bool ShouldPatch(FixedText<DialogueInfoTexts> values) =>
+            !values.Fixed.Equals(values.Original);
     }
 
+    /// <summary>
+    /// Class for patching Book records
+    /// </summary>
+    /// <param name="transforms"></param>
+    public class BookTextPatcher(IEnumerable<Func<string?, string?>> transforms)
+        : IRecordTextPatcher<IBook, IBookGetter, BookTexts>
+    {
+        private readonly IEnumerable<Func<string?, string?>> _transforms = transforms;
+
+        public FixedText<BookTexts> Apply(IBookGetter record)
+        {
+            var original = new BookTexts(record.Name?.String, record.BookText.String);
+
+            var processed = new BookTexts(
+                original.Name.Transform(_transforms),
+                original.BookText.Transform(_transforms)
+            );
+
+            return new FixedText<BookTexts>(original, processed);
+        }
+
+        public bool Filter(IBookGetter book) =>
+            !((INamedGetter)book).Name.IsNullOrWhitespace()
+            || !book.BookText.String.IsNullOrWhitespace();
+
+        public void Patch(IBook target, FixedText<BookTexts> values)
+        {
+            var fixedTexts = values.Fixed;
+            target.Name = fixedTexts.Name;
+            target.BookText = fixedTexts.BookText;
+            Console.WriteLine($"Patched BOOK:{target.FormKey}");
+        }
+
+        public bool ShouldPatch(FixedText<BookTexts> values) =>
+            !values.Fixed.Equals(values.Original);
+    }
+}

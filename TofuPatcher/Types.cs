@@ -1,7 +1,4 @@
 using Badeend.ValueCollections;
-using Mutagen.Bethesda.Plugins.Cache;
-using Mutagen.Bethesda.Plugins.Records;
-using Mutagen.Bethesda.Skyrim;
 
 namespace TofuPatcher
 {
@@ -15,20 +12,9 @@ namespace TofuPatcher
     public sealed record BookTexts(string? Name, string? BookText);
 
     /// <summary>
-    /// DTO object containing the original text values, the processed values, and the associcated mod context
+    /// DTO object containing the original text values and the processed values
     /// </summary>
-    /// <typeparam name="TMajor">The record type</typeparam>
-    /// <typeparam name="TMajorGetter">The record getter type</typeparam>
     /// <typeparam name="TValue">The type containing the text values for the record. Could be a single string or another object holding multiple values</typeparam>
-    /// <param name="Context">The mod context for the record</param>
-    /// <param name="Original">The original text values of the record</param>
-    /// <param name="Fixed">The processed text values</param>
-    public sealed record FixedText<TMajor, TMajorGetter, TValue>(
-        IModContext<ISkyrimMod, ISkyrimModGetter, TMajor, TMajorGetter> Context,
-        TValue Original,
-        TValue Fixed
-    )
-        where TMajor : TMajorGetter
-        where TMajorGetter : IMajorRecordQueryableGetter
+    public sealed record FixedText<TValue>(TValue Original, TValue Fixed)
         where TValue : notnull;
 
