@@ -57,16 +57,16 @@ namespace TofuPatcher
                     INamedGetter
                 >(state.LinkCache)
                 .Where(context => context.Record is IMajorRecordGetter); // Extra check since INamedGetter doesn't inherit from IMajorRecordGetter
-            pipeline.PatchRecords(namedPatcher, namedRecords);
+            pipeline.Run(namedPatcher, namedRecords);
 
             var dialogueInfos = state
                 .LoadOrder.PriorityOrder.DialogResponses()
                 .WinningContextOverrides(state.LinkCache);
-            pipeline.PatchRecords(infoPatcher, dialogueInfos);
+            pipeline.Run(infoPatcher, dialogueInfos);
 
 #if DEBUG
             TimeSpan elaspedTime = Stopwatch.GetElapsedTime(startTime);
-            Console.WriteLine($"Patcher took {elaspedTime.TotalSeconds}s");
+            Console.WriteLine($"Patching took {elaspedTime.TotalSeconds}s");
 #endif
 
             Console.WriteLine($"Patched {pipeline.PatchedCount} total records");

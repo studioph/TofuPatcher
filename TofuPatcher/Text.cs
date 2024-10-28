@@ -51,6 +51,57 @@ namespace TofuPatcher
         public bool FilterCommon<TMajor>(IModContext<TMajor> context)
             where TMajor : IMajorRecordQueryableGetter =>
             _filters.All(predicate => predicate((IModContext<IMajorRecordQueryableGetter>)context));
+
+        // TODO: Consider adding pipeline-level pre-filter to base classes
+        public new IEnumerable<
+            PatchingData<
+                ISkyrimMod,
+                ISkyrimModGetter,
+                IMajorRecordQueryable,
+                IMajorRecordQueryableGetter,
+                TValue
+            >
+        > GetRecordsToPatch<TValue>(
+            IConditionalTransformPatcher<
+                IMajorRecordQueryable,
+                IMajorRecordQueryableGetter,
+                TValue
+            > patcher,
+            IEnumerable<
+                IModContext<
+                    ISkyrimMod,
+                    ISkyrimModGetter,
+                    IMajorRecordQueryable,
+                    IMajorRecordQueryableGetter
+                >
+            > records
+        )
+            where TValue : notnull => base.GetRecordsToPatch(patcher, records.Where(FilterCommon));
+
+        public void Run<TMajor, TMajorGetter, TValue>(
+            IRecordTextPatcher<TMajor, TMajorGetter, TValue> patcher,
+            IEnumerable<
+                IModContext<
+                    ISkyrimMod,
+                    ISkyrimModGetter,
+                    IMajorRecordQueryable,
+                    IMajorRecordQueryableGetter
+                >
+            > records
+        )
+            where TMajor : TMajorGetter
+            where TMajorGetter : IMajorRecordQueryableGetter
+            where TValue : notnull
+        {
+            var cast =
+                (IConditionalTransformPatcher<
+                    IMajorRecordQueryable,
+                    IMajorRecordQueryableGetter,
+                    FixedText<TValue>
+                >)
+                    patcher;
+            PatchRecords(cast, GetRecordsToPatch(cast, records));
+        }
     }
 
     public static class TextUtil
