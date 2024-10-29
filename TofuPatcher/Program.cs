@@ -10,8 +10,8 @@ namespace TofuPatcher
 {
     public class Program
     {
-        static Lazy<TofuPatcherSettings> _settings = null!;
-        static TofuPatcherSettings Settings => _settings.Value;
+        private static Lazy<TofuPatcherSettings> _settings = null!;
+        private static TofuPatcherSettings Settings => _settings.Value;
 
         public static async Task<int> Main(string[] args)
         {
