@@ -1,6 +1,5 @@
 using Badeend.ValueCollections;
 using Mutagen.Bethesda.Plugins.Aspects;
-using Mutagen.Bethesda.Plugins.Records;
 using Mutagen.Bethesda.Skyrim;
 using Noggog;
 
@@ -28,12 +27,8 @@ namespace TofuPatcher
 
         public bool Filter(INamedGetter record) => !record.Name.IsNullOrWhitespace();
 
-        public void Patch(INamed target, FixedText<string> fixedText)
-        {
+        public void Patch(INamed target, FixedText<string> fixedText) =>
             target.Name = fixedText.Fixed;
-            var formKey = ((IMajorRecordGetter)target).FormKey;
-            Console.WriteLine($"Patched {formKey}");
-        }
 
         public bool ShouldPatch(FixedText<string> values) => !values.Fixed.Equals(values.Original);
     }
@@ -80,7 +75,6 @@ namespace TofuPatcher
             {
                 target.Responses[i].Text = fixedDialogue.Responses[i];
             }
-            Console.WriteLine($"Patched INFO:{target.FormKey}");
         }
 
         public bool ShouldPatch(FixedText<DialogueInfoTexts> values) =>
@@ -117,7 +111,6 @@ namespace TofuPatcher
             var fixedTexts = values.Fixed;
             target.Name = fixedTexts.Name;
             target.BookText = fixedTexts.BookText;
-            Console.WriteLine($"Patched BOOK:{target.FormKey}");
         }
 
         public bool ShouldPatch(FixedText<BookTexts> values) =>

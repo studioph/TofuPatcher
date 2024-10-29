@@ -31,13 +31,7 @@ namespace TofuPatcher
     public class TextPatcherPipeline(
         ISkyrimMod patchMod,
         params Func<IModContext<IMajorRecordQueryableGetter>, bool>[] filters
-    )
-        : ConditionalTransformPatcherPipeline<
-            ISkyrimMod,
-            ISkyrimModGetter,
-            IMajorRecordQueryable,
-            IMajorRecordQueryableGetter
-        >(patchMod)
+    ) : ConditionalTransformPatcherPipeline<ISkyrimMod, ISkyrimModGetter>(patchMod)
     {
         private readonly IEnumerable<
             Func<IModContext<IMajorRecordQueryableGetter>, bool>
@@ -48,60 +42,20 @@ namespace TofuPatcher
         /// </summary>
         /// <param name="context">The mod context to check</param>
         /// <returns>True if the context satisfies all of the conditions</returns>
-        public bool FilterCommon<TMajor>(IModContext<TMajor> context)
-            where TMajor : IMajorRecordQueryableGetter =>
+        public bool FilterCommon<TMajorGetter>(IModContext<TMajorGetter> context)
+            where TMajorGetter : IMajorRecordQueryableGetter =>
             _filters.All(predicate => predicate((IModContext<IMajorRecordQueryableGetter>)context));
 
         // TODO: Consider adding pipeline-level pre-filter to base classes
         public new IEnumerable<
-            PatchingData<
-                ISkyrimMod,
-                ISkyrimModGetter,
-                IMajorRecordQueryable,
-                IMajorRecordQueryableGetter,
-                TValue
-            >
-        > GetRecordsToPatch<TValue>(
-            IConditionalTransformPatcher<
-                IMajorRecordQueryable,
-                IMajorRecordQueryableGetter,
-                TValue
-            > patcher,
-            IEnumerable<
-                IModContext<
-                    ISkyrimMod,
-                    ISkyrimModGetter,
-                    IMajorRecordQueryable,
-                    IMajorRecordQueryableGetter
-                >
-            > records
-        )
-            where TValue : notnull => base.GetRecordsToPatch(patcher, records.Where(FilterCommon));
-
-        public void Run<TMajor, TMajorGetter, TValue>(
-            IRecordTextPatcher<TMajor, TMajorGetter, TValue> patcher,
-            IEnumerable<
-                IModContext<
-                    ISkyrimMod,
-                    ISkyrimModGetter,
-                    IMajorRecordQueryable,
-                    IMajorRecordQueryableGetter
-                >
-            > records
+            PatchingData<ISkyrimMod, ISkyrimModGetter, TMajor, TMajorGetter, TValue>
+        > GetRecordsToPatch<TMajor, TMajorGetter, TValue>(
+            IConditionalTransformPatcher<TMajor, TMajorGetter, TValue> patcher,
+            IEnumerable<IModContext<ISkyrimMod, ISkyrimModGetter, TMajor, TMajorGetter>> records
         )
             where TMajor : TMajorGetter
             where TMajorGetter : IMajorRecordQueryableGetter
-            where TValue : notnull
-        {
-            var cast =
-                (IConditionalTransformPatcher<
-                    IMajorRecordQueryable,
-                    IMajorRecordQueryableGetter,
-                    FixedText<TValue>
-                >)
-                    patcher;
-            PatchRecords(cast, GetRecordsToPatch(cast, records));
-        }
+            where TValue : notnull => base.GetRecordsToPatch(patcher, records.Where(FilterCommon));
     }
 
     public static class TextUtil
