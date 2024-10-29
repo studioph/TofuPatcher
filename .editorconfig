@@ -9,3 +9,8 @@ dotnet_diagnostic.CS4014.severity = error
 
 # CS1998: Async function does not contain await
 dotnet_diagnostic.CS1998.severity = silent
+
+# RS0062: Do not capture primary constructor parameters
+dotnet_diagnostic.RS0062.severity = warning
+
+dotnet_diagnostic.CA1416.severity = none
