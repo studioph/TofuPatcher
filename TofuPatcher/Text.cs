@@ -79,7 +79,9 @@ namespace TofuPatcher
         ) => transforms.Aggregate(str, (current, func) => func(current));
 
         /// <summary>
-        /// Converts a string that may contain invalid characters to ASCII
+        /// Converts a string that may contain invalid characters to ASCII.
+        ///
+        /// If there are no invalid characters, the original string is returned unchanged
         /// </summary>
         /// <param name="text">The string to modify</param>
         /// <returns>The transliterated string</returns>

@@ -30,8 +30,8 @@ namespace TofuPatcher
         {
             var excludeMods = Settings.ExcludeMods.ToFrozenSet();
 
+            // Add text transformations based on user settings
             var transforms = new List<Func<string?, string?>> { TextUtil.ToAscii };
-
             if (Settings.TrimWhitespace)
             {
                 transforms.Add(str => str?.Trim());
@@ -49,6 +49,7 @@ namespace TofuPatcher
                 context => !excludeMods.Contains(context.ModKey)
             );
 
+            // Patch any records with names
             var namedRecords = state
                 .LoadOrder.PriorityOrder.WinningContextOverrides<
                     ISkyrimMod,
@@ -59,6 +60,7 @@ namespace TofuPatcher
                 .Where(context => context.Record is IMajorRecordGetter); // Extra check since INamedGetter doesn't inherit from IMajorRecordGetter
             pipeline.Run(namedPatcher, namedRecords);
 
+            // Patch dialogue responses
             var dialogueInfos = state
                 .LoadOrder.PriorityOrder.DialogResponses()
                 .WinningContextOverrides(state.LinkCache);
