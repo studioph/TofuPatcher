@@ -29,8 +29,6 @@ namespace TofuPatcher
 
         public void Patch(INamed target, FixedText<string> fixedText) =>
             target.Name = fixedText.Fixed;
-
-        public bool ShouldPatch(FixedText<string> values) => !values.Fixed.Equals(values.Original);
     }
 
     /// <summary>
@@ -76,9 +74,6 @@ namespace TofuPatcher
                 target.Responses[i].Text = fixedDialogue.Responses[i];
             }
         }
-
-        public bool ShouldPatch(FixedText<DialogueInfoTexts> values) =>
-            !values.Fixed.Equals(values.Original);
     }
 
     /// <summary>
@@ -112,8 +107,5 @@ namespace TofuPatcher
             target.Name = fixedTexts.Name;
             target.BookText = fixedTexts.BookText;
         }
-
-        public bool ShouldPatch(FixedText<BookTexts> values) =>
-            !values.Fixed.Equals(values.Original);
     }
 }

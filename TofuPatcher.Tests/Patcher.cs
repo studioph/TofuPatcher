@@ -12,8 +12,9 @@ public sealed record NamedGetter(string? Name) : INamedGetter
 
 public class NamedPatcherTests
 {
-    private static NamedRecordTextPatcher _patcher = new([TextUtil.ToAscii, str => str?.Trim()]);
-    public static IEnumerable<object[]> FilterTestData =
+    private static readonly NamedRecordTextPatcher _patcher =
+        new([TextUtil.ToAscii, str => str?.Trim()]);
+    public static object[][] FilterTestData =
     [
         [new NamedGetter(null), false],
         [new NamedGetter(string.Empty), false],
@@ -29,7 +30,7 @@ public class NamedPatcherTests
         _patcher.Filter(record).Should().Be(expected);
     }
 
-    public static IEnumerable<object[]> ApplyTestData =
+    public static object[][] ApplyTestData =
     [
         [new NamedGetter(null), new FixedText<string>(string.Empty, string.Empty)],
         [new NamedGetter(string.Empty), new FixedText<string>(string.Empty, string.Empty)],
@@ -48,9 +49,10 @@ public class NamedPatcherTests
 
 public class DialogueInfoPatcherTests
 {
-    private static DialogueInfoTextPatcher _patcher = new([TextUtil.ToAscii, str => str?.Trim()]);
+    private static readonly DialogueInfoTextPatcher _patcher =
+        new([TextUtil.ToAscii, str => str?.Trim()]);
 
-    public static IEnumerable<object[]> FilterTestData =
+    public static object[][] FilterTestData =
     [
         [Factory(null, []), false],
         [Factory(null, [" Response1 "]), true],
@@ -68,7 +70,7 @@ public class DialogueInfoPatcherTests
         _patcher.Filter(record).Should().Be(expected);
     }
 
-    public static IEnumerable<object[]> ApplyTestData =
+    public static object[][] ApplyTestData =
     [
         [
             Factory(null, []),
@@ -110,7 +112,7 @@ public class DialogueInfoPatcherTests
         _patcher.Apply(record).Should().Be(expected);
     }
 
-    public static IEnumerable<object[]> PatchTestData =
+    public static object[][] PatchTestData =
     [
         [
             Factory(null, [" Response1 "]),
@@ -152,12 +154,11 @@ public class DialogueInfoPatcherTests
 
     private static IDialogResponses Factory(string? prompt, IEnumerable<string?> responses)
     {
-        DialogResponses record = new(FormKey.Factory("123456:Test.esp"), SkyrimRelease.SkyrimSE);
-        record.Prompt = prompt;
+        DialogResponses record =
+            new(FormKey.Factory("123456:Test.esp"), SkyrimRelease.SkyrimSE) { Prompt = prompt };
         foreach (var responseText in responses)
         {
-            DialogResponse response = new();
-            response.Text = responseText;
+            DialogResponse response = new() { Text = responseText };
             record.Responses.Add(response);
         }
         return record;

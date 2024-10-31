@@ -20,7 +20,9 @@ namespace TofuPatcher
         where TMajorGetter : IMajorRecordQueryableGetter
         where TValue : notnull
     {
-        // Sadly, cannot use default interface method for `ShouldPatch` here...
+        bool IConditionalTransformPatcher<TMajor, TMajorGetter, FixedText<TValue>>.ShouldPatch(
+            FixedText<TValue> values
+        ) => !values.Fixed.Equals(values.Original);
     }
 
     /// <summary>
@@ -28,14 +30,10 @@ namespace TofuPatcher
     /// </summary>
     /// <param name="patchMod">The mutable mod object to write changes to</param>
     /// <param name="filters">Common filters to apply to each record/context before processing</param>
-    public class TextPatcherPipeline(
-        ISkyrimMod patchMod,
-        params Func<IModContext<IMajorRecordQueryableGetter>, bool>[] filters
-    ) : ConditionalTransformPatcherPipeline<ISkyrimMod, ISkyrimModGetter>(patchMod)
+    public class TextPatcherPipeline(ISkyrimMod patchMod, params Func<IModContext, bool>[] filters)
+        : ConditionalTransformPatcherPipeline<ISkyrimMod, ISkyrimModGetter>(patchMod)
     {
-        private readonly IEnumerable<
-            Func<IModContext<IMajorRecordQueryableGetter>, bool>
-        > _filters = filters;
+        private readonly IEnumerable<Func<IModContext, bool>> _filters = filters;
 
         /// <summary>
         /// Applies multiple filters against a mod context
@@ -44,7 +42,7 @@ namespace TofuPatcher
         /// <returns>True if the context satisfies all of the conditions</returns>
         public bool FilterCommon<TMajorGetter>(IModContext<TMajorGetter> context)
             where TMajorGetter : IMajorRecordQueryableGetter =>
-            _filters.All(predicate => predicate((IModContext<IMajorRecordQueryableGetter>)context));
+            _filters.All(predicate => predicate(context));
 
         // TODO: Consider adding pipeline-level pre-filter to base classes
         public new IEnumerable<
