@@ -31,7 +31,7 @@ namespace TofuPatcher
     /// <param name="patchMod">The mutable mod object to write changes to</param>
     /// <param name="filters">Common filters to apply to each record/context before processing</param>
     public class TextPatcherPipeline(ISkyrimMod patchMod, params Func<IModContext, bool>[] filters)
-        : ConditionalTransformPatcherPipeline<ISkyrimMod, ISkyrimModGetter>(patchMod)
+        : SkyrimConditionalPipeline(patchMod)
     {
         private readonly IEnumerable<Func<IModContext, bool>> _filters = filters;
 
