@@ -18,3 +18,4 @@ namespace TofuPatcher
     public sealed record FixedText<TValue>(TValue Original, TValue Fixed)
         where TValue : notnull;
 
+}
