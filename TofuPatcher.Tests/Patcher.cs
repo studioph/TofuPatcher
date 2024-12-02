@@ -2,6 +2,7 @@ using FluentAssertions;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Aspects;
 using Mutagen.Bethesda.Skyrim;
+using Mutagen.Bethesda.Strings;
 
 namespace TofuPatcher.Tests;
 
@@ -12,8 +13,9 @@ public sealed record NamedGetter(string? Name) : INamedGetter
 
 public class NamedPatcherTests
 {
-    private static readonly NamedRecordTextPatcher _patcher =
-        new([TextUtil.ToAscii, str => str?.Trim()]);
+    private static readonly NamedRecordTextPatcher _patcher = new(
+        [TextUtil.ToAscii, str => str?.Trim()]
+    );
     public static object[][] FilterTestData =
     [
         [new NamedGetter(null), false],
@@ -49,8 +51,9 @@ public class NamedPatcherTests
 
 public class DialogueInfoPatcherTests
 {
-    private static readonly DialogueInfoTextPatcher _patcher =
-        new([TextUtil.ToAscii, str => str?.Trim()]);
+    private static readonly DialogueInfoTextPatcher _patcher = new(
+        [TextUtil.ToAscii, str => str?.Trim()]
+    );
 
     public static object[][] FilterTestData =
     [
@@ -75,15 +78,15 @@ public class DialogueInfoPatcherTests
         [
             Factory(null, []),
             new FixedText<DialogueInfoTexts>(
-                new DialogueInfoTexts(null, []),
-                new DialogueInfoTexts(null, [])
+                new DialogueInfoTexts((string?)null, []),
+                new DialogueInfoTexts((string?)null, [])
             ),
         ],
         [
             Factory(null, [" Response1 "]),
             new FixedText<DialogueInfoTexts>(
-                new DialogueInfoTexts(null, [" Response1 "]),
-                new DialogueInfoTexts(null, ["Response1"])
+                new DialogueInfoTexts((TranslatedString?)null, [" Response1 "]),
+                new DialogueInfoTexts((TranslatedString?)null, ["Response1"])
             ),
         ],
         [
@@ -117,8 +120,8 @@ public class DialogueInfoPatcherTests
         [
             Factory(null, [" Response1 "]),
             new FixedText<DialogueInfoTexts>(
-                new DialogueInfoTexts(null, [" Response1 "]),
-                new DialogueInfoTexts(null, ["Response1"])
+                new DialogueInfoTexts((string?)null, [" Response1 "]),
+                new DialogueInfoTexts((string?)null, ["Response1"])
             ),
             Factory(null, ["Response1"]),
         ],
@@ -152,10 +155,15 @@ public class DialogueInfoPatcherTests
         target.Should().Be(expected);
     }
 
-    private static IDialogResponses Factory(string? prompt, IEnumerable<string?> responses)
+    private static IDialogResponses Factory(
+        TranslatedString? prompt,
+        IEnumerable<string?> responses
+    )
     {
-        DialogResponses record =
-            new(FormKey.Factory("123456:Test.esp"), SkyrimRelease.SkyrimSE) { Prompt = prompt };
+        DialogResponses record = new(FormKey.Factory("123456:Test.esp"), SkyrimRelease.SkyrimSE)
+        {
+            Prompt = prompt,
+        };
         foreach (var responseText in responses)
         {
             DialogResponse response = new() { Text = responseText };

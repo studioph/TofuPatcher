@@ -11,7 +11,6 @@ namespace TofuPatcher
     public class Program
     {
         private static Lazy<TofuPatcherSettings> _settings = null!;
-        private static TofuPatcherSettings Settings => _settings.Value;
 
         public static async Task<int> Main(string[] args)
         {
@@ -28,11 +27,11 @@ namespace TofuPatcher
 
         public static void RunPatch(IPatcherState<ISkyrimMod, ISkyrimModGetter> state)
         {
-            var excludeMods = Settings.ExcludeMods.ToFrozenSet();
+            var excludeMods = _settings.Value.ExcludeMods.ToFrozenSet();
 
             // Add text transformations based on user settings
             var transforms = new List<Func<string?, string?>> { TextUtil.ToAscii };
-            if (Settings.TrimWhitespace)
+            if (_settings.Value.TrimWhitespace)
             {
                 transforms.Add(str => str?.Trim());
             }
